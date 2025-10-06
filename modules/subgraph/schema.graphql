@@ -1,0 +1,6 @@
+type Account @entity(immutable: false) {
+  id: ID!
+  state: String!
+  updatedAt: BigInt!
+}
+
