@@ -1,0 +1,42 @@
+# Foundry/Forge
+out/
+broadcast/
+cache/
+lib/
+**/artifacts/
+**/cache/
+.dapp/
+
+# Node / Deno / tooling
+node_modules/
+.npm/
+.pnpm-store/
+coverage/
+coverage-*
+.nyc_output/
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.denoflare/
+.deno/
+.deno-dir/
+.deno_cache/
+
+# Env & local config
+.env
+.env.*
+.env.local
+.envrc
+.secret*
+*.local
+
+# Editor/OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.tags
+Thumbs.db
+.DS_Store

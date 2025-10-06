@@ -1,0 +1,8 @@
+{
+  "tasks": {
+    "deploy": "deno run --allow-env=PRIVATE_KEY --allow-net --allow-read script/deploy.ts",
+    "script:reset": "deno run --allow-env --allow-net --allow-read scripts/reset.ts",
+    "script:update": "deno run --allow-env --allow-net --allow-read scripts/update.ts",
+    "script:state": "deno run --allow-env --allow-net --allow-read scripts/state.ts"
+  }
+}
