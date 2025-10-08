@@ -1,5 +1,6 @@
 import { Command } from "cliffy/command";
 import { exists } from "std/fs/exists.ts";
+import { REGISTRY_PATH } from "../utils/constants.ts";
 
 export const removeCommand = new Command()
   .name("subgraph:remove")
@@ -10,7 +11,7 @@ export const removeCommand = new Command()
     try {
       const projectName = options.name;
       const projectPath = `./${projectName}`;
-      const registryPath = "./sef.json";
+      const registryPath = REGISTRY_PATH;
       
       // Check if project exists in registry
       let registry: Record<string, { subgraph_path: string }> = {};
