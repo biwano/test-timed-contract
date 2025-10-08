@@ -1,9 +1,9 @@
-import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
-import { ensureDir } from "https://deno.land/std@0.208.0/fs/ensure_dir.ts";
-import { join } from "https://deno.land/std@0.208.0/path/mod.ts";
+import { Command } from "cliffy/command";
+import { ensureDir } from "std/fs/ensure_dir.ts";
+import { join } from "std/path/mod.ts";
 import { parseSubgraph } from "../utils/subgraph_parser.ts";
 import { generateFakeContract } from "../utils/contract_generator.ts";
-import { buildDeployScript } from "../utils/deploy_script.ts";
+import { buildDeployScript } from "../utils/deploy_script_generator.ts";
 
 export const generateCommand = new Command()
   .name("generate")
@@ -42,7 +42,7 @@ export const generateCommand = new Command()
       // Generate fake contracts for each contract
       for (const contract of subgraphData.contracts) {
         console.log(`Generating fake contract for: ${contract.name}`);
-        const contractCode = generateFakeContract(contract);
+        const contractCode = await generateFakeContract(contract);
         
         const outputPath = join(outputDir, `${contract.name}.sol`);
         await Deno.writeTextFile(outputPath, contractCode);
@@ -51,14 +51,15 @@ export const generateCommand = new Command()
       
       // Generate Foundry deployment script that deploys and etches to target addresses
       const deployScriptPath = join(scriptDir, "Deploy.s.sol");
-      const deployScript = buildDeployScript(options.name, subgraphData.contracts);
+      const deployScript = await buildDeployScript(options.name, subgraphData.contracts);
       await Deno.writeTextFile(deployScriptPath, deployScript);
       console.log(`Created deployment script: ${deployScriptPath}`);
       
       console.log("Fake contracts generated successfully!");
       
     } catch (error) {
-      console.error("Error generating fake contracts:", error instanceof Error ? error.message : String(error));
+      throw error;
+      //console.error("Error generating fake contracts:", error instanceof Error ? error.message : String(error));
       Deno.exit(1);
     }
   });

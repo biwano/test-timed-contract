@@ -1,5 +1,5 @@
-import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
-import { exists } from "https://deno.land/std@0.208.0/fs/exists.ts";
+import { Command } from "cliffy/command";
+import { exists } from "std/fs/exists.ts";
 
 export const removeCommand = new Command()
   .name("remove")

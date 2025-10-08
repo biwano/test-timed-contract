@@ -1,4 +1,4 @@
-import { parse as parseYaml } from "https://deno.land/std@0.208.0/yaml/mod.ts";
+import { parse as parseYaml } from "std/yaml/mod.ts";
 import { Contract, Event, SubgraphData, SubgraphYaml } from "./types.ts";
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env deno run --allow-read --allow-write --allow-run --allow-net
 
-import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
+import { Command } from "cliffy/command";
 import { initCommand } from "./commands/init.ts";
 import { generateCommand } from "./commands/generate.ts";
 import { removeCommand } from "./commands/remove.ts";

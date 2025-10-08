@@ -1,6 +1,6 @@
-import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
-import { ensureDir } from "https://deno.land/std@0.208.0/fs/ensure_dir.ts";
-import { parse as parseYaml } from "https://deno.land/std@0.208.0/yaml/mod.ts";
+import { Command } from "cliffy/command";
+import { ensureDir } from "std/fs/ensure_dir.ts";
+import { parse as parseYaml } from "std/yaml/mod.ts";
 
 export const initCommand = new Command()
   .name("init")
