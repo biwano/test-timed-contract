@@ -1,27 +1,12 @@
 import { parse as parseYaml } from "https://deno.land/std@0.208.0/yaml/mod.ts";
+import { ParseAbiItem, parseAbiItem } from "https://esm.sh/viem@2.0.0";
 
-export interface Event {
-  name: string;
-  inputs: Array<{
-    name: string;
-    type: string;
-    indexed?: boolean;
-  }>;
-}
+export type ParsedEvent = ParseAbiItem<string>;
 
 export interface Contract {
   name: string;
   address: string;
-  abi: Array<{
-    type: string;
-    name?: string;
-    inputs?: Array<{
-      name: string;
-      type: string;
-      indexed?: boolean;
-    }>;
-  }>;
-  events: Event[];
+  events: ParsedEvent[];
 }
 
 export interface SubgraphData {
@@ -31,38 +16,41 @@ export interface SubgraphData {
 export async function parseSubgraph(subgraphPath: string): Promise<SubgraphData> {
   try {
     const subgraphContent = await Deno.readTextFile(subgraphPath);
-    const subgraph = parseYaml(subgraphContent) as any;
+        const subgraph = parseYaml(subgraphContent) as Record<string, unknown>;
     
     const contracts: Contract[] = [];
     
     // Parse data sources from subgraph
-    if (subgraph.dataSources) {
-      for (const source of subgraph.dataSources) {
-        if (source.mapping && source.mapping.abis) {
-          for (const abiRef of source.mapping.abis) {
-            const abiName = abiRef.name;
-            const abiPath = abiRef.file;
+    if (subgraph.dataSources && Array.isArray(subgraph.dataSources)) {
+      for (const source of subgraph.dataSources as Record<string, unknown>[]) {
+        const mapping = source.mapping as Record<string, unknown>;
+        if (mapping && mapping.eventHandlers && Array.isArray(mapping.eventHandlers)) {
+          const contractName = source.name as string;
+          const events: ParsedEvent[] = [];
+          
+          // Extract events from eventHandlers
+          for (const handler of mapping.eventHandlers as Record<string, unknown>[]) {
+            const eventSignature = handler.event as string;
             
-            // Read ABI file
-            const abiContent = await Deno.readTextFile(abiPath);
-            const abi = JSON.parse(abiContent);
-            
-            // Extract events from ABI
-            const events = abi
-              .filter((item: any) => item.type === 'event')
-              .map((event: any) => ({
-                name: event.name,
-                inputs: event.inputs || []
-              }));
-            
-            if (events.length > 0) {
-              contracts.push({
-                name: abiName,
-                address: source.source.address || "0x0000000000000000000000000000000000000000",
-                abi: abi,
-                events: events
-              });
+            try {
+              // Use viem to parse the event signature
+              const parsed = parseAbiItem(`event ${eventSignature}`);
+              if (parsed && parsed.type === 'event') {
+                events.push(parsed);
+              }
+            } catch (error) {
+              console.warn(`Failed to parse event signature: ${eventSignature}`, error);
+              // Skip un-parseable events
             }
+          }
+          
+          if (events.length > 0) {
+            const sourceObj = source.source as Record<string, unknown>;
+            contracts.push({
+              name: contractName,
+              address: (sourceObj.address as string) || "0x0000000000000000000000000000000000000000",
+              events: events
+            });
           }
         }
       }
@@ -71,6 +59,6 @@ export async function parseSubgraph(subgraphPath: string): Promise<SubgraphData>
     return { contracts };
     
   } catch (error) {
-    throw new Error(`Failed to parse subgraph: ${error.message}`);
+    throw new Error(`Failed to parse subgraph: ${error instanceof Error ? error.message : String(error)}`);
   }
 }

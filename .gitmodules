@@ -4,3 +4,9 @@
 [submodule "modules/anvil-event-faker/test-project/lib/forge-std"]
 	path = modules/anvil-event-faker/test-project/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "modules/anvil-event-faker/foundry/lib/forge-std"]
+	path = modules/anvil-event-faker/foundry/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "modules/anvil-event-faker/f2/lib/forge-std"]
+	path = modules/anvil-event-faker/f2/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std

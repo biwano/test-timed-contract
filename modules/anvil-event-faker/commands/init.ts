@@ -1,5 +1,6 @@
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
 import { ensureDir } from "https://deno.land/std@0.208.0/fs/ensure_dir.ts";
+import { parse as parseYaml } from "https://deno.land/std@0.208.0/yaml/mod.ts";
 
 export const initCommand = new Command()
   .name("init")
@@ -13,7 +14,24 @@ export const initCommand = new Command()
     console.log(`Initializing foundry project at: ${projectPath}`);
     
     try {
-      // Ensure the directory exists
+      // Validate subgraph YAML file
+      const subgraphYamlPath = `${subgraphPath}/subgraph.yaml`;
+      console.log(`Validating subgraph YAML file: ${subgraphYamlPath}`);
+      
+      try {
+        const subgraphContent = await Deno.readTextFile(subgraphYamlPath);
+        const subgraphData = parseYaml(subgraphContent) as Record<string, unknown>;
+        
+        // Basic validation of subgraph structure
+        if (!subgraphData.specVersion) {
+          throw new Error("Invalid subgraph.yaml: missing required fields (specVersion, dataSources)");
+        }
+        console.log("✅ Subgraph YAML validation passed");
+        
+      } catch (error) {
+        throw new Error(`Subgraph validation failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
+     // Ensure the directory exists
       await ensureDir(projectPath);
       
       // Change to the project directory
@@ -37,15 +55,24 @@ export const initCommand = new Command()
       console.log("Foundry project initialized successfully!");
       console.log(new TextDecoder().decode(stdout));
       
-      // Create a basic sef.json file
-      const configContent = {
-        name: projectPath,
-        subgraph_path: `${subgraphPath}/subgraph.yaml`,
-        output_dir: "./src/fake_contracts"
+      // Create or update sef.json registry in anvil-event-faker folder
+      const registryPath = "../sef.json";
+      let registry: Record<string, { subgraph_path: string }> = {};
+      
+      try {
+        const existingRegistry = await Deno.readTextFile(registryPath);
+        registry = JSON.parse(existingRegistry);
+      } catch {
+        // File doesn't exist, start with empty registry
+      }
+      
+      // Add or update entry for this project
+      registry[projectPath] = {
+        subgraph_path: subgraphPath
       };
       
-      await Deno.writeTextFile("sef.json", JSON.stringify(configContent, null, 2));
-      console.log("Created sef.json configuration file");
+      await Deno.writeTextFile(registryPath, JSON.stringify(registry, null, 2));
+      console.log(`Updated sef.json registry with project: ${projectPath}`);
       
       // Change back to original directory
       Deno.chdir(originalCwd);

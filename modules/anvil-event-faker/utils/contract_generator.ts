@@ -1,4 +1,4 @@
-import { Contract, Event } from "./subgraph_parser.ts";
+import { Contract } from "./subgraph_parser.ts";
 
 export function generateFakeContract(contract: Contract): string {
   const contractName = contract.name;
@@ -8,25 +8,25 @@ export function generateFakeContract(contract: Contract): string {
 pragma solidity ^0.8.0;
 
 /**
- * @title ${contractName}Fake
+ * @title ${contractName}
  * @dev Fake contract that emits events for testing purposes
  * Generated from subgraph definition
  */
-contract ${contractName}Fake {
+contract ${contractName} {
 `;
 
   // Add events
-  for (const event of events) {
-    solidityCode += `    event ${event.name}(${formatEventParameters(event.inputs)});\n`;
+  for (const event of events as Array<{ name: string; inputs: unknown }>) {
+    solidityCode += `    event ${event.name}(${formatEventParameters(event.inputs as Array<{ name: string; type: string; indexed?: boolean }>)});\n`;
   }
   
   solidityCode += "\n";
   
   // Add functions that emit events
-  for (const event of events) {
+  for (const event of events as Array<{ name: string; inputs: unknown }>) {
     const functionName = `emit${capitalizeFirst(event.name)}`;
-    const parameters = formatFunctionParameters(event.inputs);
-    const emitCall = `emit ${event.name}(${formatEmitArguments(event.inputs)});`;
+    const parameters = formatFunctionParameters(event.inputs as Array<{ name: string; type: string; indexed?: boolean }>);
+    const emitCall = `emit ${event.name}(${formatEmitArguments(event.inputs as Array<{ name: string; type: string; indexed?: boolean }>)});`;
     
     solidityCode += `    function ${functionName}(${parameters}) external {\n`;
     solidityCode += `        ${emitCall}\n`;

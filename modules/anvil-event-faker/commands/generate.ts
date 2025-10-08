@@ -7,33 +7,41 @@ import { generateFakeContract } from "../utils/contract_generator.ts";
 export const generateCommand = new Command()
   .name("generate")
   .description("Generate fake contracts based on subgraph definitions")
-  .option("-c, --config <path>", "Path to sef.json configuration file", { default: "./sef.json" })
   .option("-n, --name <name>", "Name of the folder containing the foundry project", { default: "foundry" })
-  .action(async (options: { config: string; name: string }) => {
+  .action(async (options: { name: string }) => {
     try {
-      // Read configuration file
-      const configPath = options.config;
-      const configContent = await Deno.readTextFile(configPath);
-      const config = JSON.parse(configContent) as Config;
+      // Read from sef.json registry
+      const registryPath = "./sef.json";
+      const registryContent = await Deno.readTextFile(registryPath);
+      const registry = JSON.parse(registryContent) as Record<string, { subgraph_path: string }>;
+      
+      // Get project configuration from registry
+      const projectConfig = registry[options.name];
+      if (!projectConfig) {
+        throw new Error(`Project '${options.name}' not found in registry. Run 'init' command first.`);
+      }
+      
+      const subgraphPath = `${projectConfig.subgraph_path}/subgraph.yaml`;
+      const outputDir = `./${options.name}/src`;
       
       console.log("Configuration loaded:");
-      console.log(`  Project name: ${config.name}`);
-      console.log(`  Subgraph path: ${config.subgraph_path}`);
-      console.log(`  Output directory: ${config.output_dir}`);
+      console.log(`  Project name: ${options.name}`);
+      console.log(`  Subgraph path: ${subgraphPath}`);
+      console.log(`  Output directory: ${outputDir}`);
       
       // Parse subgraph.yaml
-      const subgraphData = await parseSubgraph(config.subgraph_path);
+      const subgraphData = await parseSubgraph(subgraphPath);
       console.log(`Found ${subgraphData.contracts.length} contracts in subgraph`);
       
       // Ensure output directory exists
-      await ensureDir(config.output_dir);
+      await ensureDir(outputDir);
       
       // Generate fake contracts for each contract
       for (const contract of subgraphData.contracts) {
         console.log(`Generating fake contract for: ${contract.name}`);
         const contractCode = generateFakeContract(contract);
         
-        const outputPath = join(config.output_dir, `${contract.name}.sol`);
+        const outputPath = join(outputDir, `${contract.name}.sol`);
         await Deno.writeTextFile(outputPath, contractCode);
         console.log(`  Created: ${outputPath}`);
       }
@@ -46,9 +54,4 @@ export const generateCommand = new Command()
     }
   });
 
-interface Config {
-  name: string;
-  subgraph_path: string;
-  output_dir: string;
-}
 
