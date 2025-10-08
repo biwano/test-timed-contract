@@ -4,12 +4,12 @@ import { join } from "std/path/mod.ts";
 import { parseSubgraph } from "../utils/subgraph_parser.ts";
 import { generateFakeContract } from "../utils/contract_generator.ts";
 import { buildDeployScript } from "../utils/deploy_script_generator.ts";
-import { REGISTRY_PATH } from "../utils/constants.ts";
+import { FOUNDRY_ROOT, REGISTRY_PATH } from "../utils/constants.ts";
 
 // Generate code for a single registered project
 export async function generateForProject(projectName: string, subgraphPath: string): Promise<void> {
   const resolvedSubgraphYamlPath = `${subgraphPath}/subgraph.yaml`;
-  const outputDir = `./${projectName}/src`;
+        const outputDir = `${FOUNDRY_ROOT}/${projectName}/src`;
 
   console.log("Configuration loaded:");
   console.log(`  Project name: ${projectName}`);
@@ -22,7 +22,7 @@ export async function generateForProject(projectName: string, subgraphPath: stri
 
   // Ensure output directories exist
   await ensureDir(outputDir);
-  const scriptDir = join(`./${projectName}`, "script");
+        const scriptDir = join(`${FOUNDRY_ROOT}/${projectName}`, "script");
   await ensureDir(scriptDir);
 
   // Generate fake contracts for each contract

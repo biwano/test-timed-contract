@@ -1,14 +1,15 @@
 import { Command } from "cliffy/command";
 import { ensureDir } from "std/fs/ensure_dir.ts";
+import { DEFAULT_PROJECT_NAME, FOUNDRY_ROOT, REGISTRY_PATH } from "../utils/constants.ts";
 import { parse as parseYaml } from "std/yaml/mod.ts";
 
 export const initCommand = new Command()
   .name("subgraph:add")
   .description("Initialize a foundry project for event faking")
   .option("-s, --subgraph <path>", "Path of the subgraph folder associated with the foundry project", { required: true })
-  .option("-n, --name <name>", "Name of the folder containing the foundry project", { default: "foundry" })
+  .option("-n, --name <name>", "Name of the foundry project", { default: DEFAULT_PROJECT_NAME })
   .action(async (options: { subgraph: string; name: string }) => {
-    const projectPath = options.name;
+    const projectPath = `${FOUNDRY_ROOT}/${options.name}`;
     const subgraphPath = options.subgraph;
     
     console.log(`Initializing foundry project at: ${projectPath}`);
@@ -56,22 +57,21 @@ export const initCommand = new Command()
       console.log(new TextDecoder().decode(stdout));
       
       // Create or update sef.json registry in anvil-event-faker folder
-      const registryPath = "../sef.json";
       let registry: Record<string, { subgraph_path: string }> = {};
       
       try {
-        const existingRegistry = await Deno.readTextFile(registryPath);
+        const existingRegistry = await Deno.readTextFile(REGISTRY_PATH);
         registry = JSON.parse(existingRegistry);
       } catch {
         // File doesn't exist, start with empty registry
       }
       
       // Add or update entry for this project
-      registry[projectPath] = {
+      registry[options.name] = {
         subgraph_path: subgraphPath
       };
       
-      await Deno.writeTextFile(registryPath, JSON.stringify(registry, null, 2));
+      await Deno.writeTextFile(REGISTRY_PATH, JSON.stringify(registry, null, 2));
       console.log(`Updated sef.json registry with project: ${projectPath}`);
       
       // Change back to original directory

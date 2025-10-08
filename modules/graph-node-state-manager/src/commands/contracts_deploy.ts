@@ -1,9 +1,9 @@
 import { Command } from "cliffy/command";
 import { exists } from "std/fs/exists.ts";
-import { ANVIL_DEFAULT_PRIVATE_KEY, ANVIL_DEFAULT_RPC_URL, REGISTRY_PATH } from "../utils/constants.ts";
+import { ANVIL_DEFAULT_PRIVATE_KEY, ANVIL_DEFAULT_RPC_URL, FOUNDRY_ROOT, REGISTRY_PATH } from "../utils/constants.ts";
 
 async function deployForProject(projectName: string, rpcUrl: string, privateKey: string): Promise<void> {
-  const projectDir = `./${projectName}`;
+  const projectDir = `${FOUNDRY_ROOT}/${projectName}`;
   const scriptPath = `${projectDir}/script/Deploy.s.sol`;
 
   if (!(await exists(projectDir))) {

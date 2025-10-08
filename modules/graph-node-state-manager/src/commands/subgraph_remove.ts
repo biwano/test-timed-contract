@@ -1,6 +1,6 @@
 import { Command } from "cliffy/command";
 import { exists } from "std/fs/exists.ts";
-import { REGISTRY_PATH } from "../utils/constants.ts";
+import { FOUNDRY_ROOT, REGISTRY_PATH } from "../utils/constants.ts";
 
 export const removeCommand = new Command()
   .name("subgraph:remove")
@@ -9,8 +9,8 @@ export const removeCommand = new Command()
   .option("-f, --force", "Force removal without confirmation", { default: false })
   .action(async (options: { name: string; force: boolean }) => {
     try {
-      const projectName = options.name;
-      const projectPath = `./${projectName}`;
+    const projectName = options.name;
+    const projectPath = `${FOUNDRY_ROOT}/${projectName}`;
       const registryPath = REGISTRY_PATH;
       
       // Check if project exists in registry
