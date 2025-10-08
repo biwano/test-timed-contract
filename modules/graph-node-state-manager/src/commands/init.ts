@@ -3,7 +3,7 @@ import { ensureDir } from "std/fs/ensure_dir.ts";
 import { parse as parseYaml } from "std/yaml/mod.ts";
 
 export const initCommand = new Command()
-  .name("init")
+  .name("subgraph:add")
   .description("Initialize a foundry project for event faking")
   .option("-s, --subgraph <path>", "Path of the subgraph folder associated with the foundry project", { required: true })
   .option("-n, --name <name>", "Name of the folder containing the foundry project", { default: "foundry" })

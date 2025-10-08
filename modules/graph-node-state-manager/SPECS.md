@@ -16,7 +16,7 @@ It is a CLI that can perform multiple tasks. It reads its config from a file cal
 ## Implementation Status: ✅ COMPLETED
 
 The tasks are:
-- **init**: Use foundry CLI to instantiate a foundry project
+- **subgraph:add**: Use foundry CLI to instantiate a foundry project
   - Creates a new foundry project using `forge init`
   - Requires a `--subgraph` argument: path of the subgraph folder associated with the the foundry project. The task checks that it corresponds to a properly formatted YAML file
   - Validates subgraph.yaml structure including required fields (specVersion, dataSources, etc.)
@@ -24,40 +24,40 @@ The tasks are:
   - Takes a `--name` argument: name of the folder containing the foundry project (defaults to foundry)
   - Creates or updates a `sef.json` registry file in the anvil-event-faker folder
   - Registry is a map indexed by project name containing subgraph path
-- **generate**: 
-  - Reads project configuration from sef.json registry
-  - Takes a `--name` argument: name of the folder containing the foundry project (defaults to foundry)
-  - Looks up project in registry to get subgraph path
-  - Parses subgraph.yaml file using the registered subgraph path
-  - Extracts events from subgraph eventHandlers definitions
-  - For each contract name creates an actual Solidity contract where there is one function per associated event
-  - Each function has the same arguments as the events and its purpose is only to emit the associated event
-  - Generates contracts in `./{name}/src/fake_contracts/` directory
-- **remove**: 
+- **subgraph:remove**: 
   - Removes a foundry project from registry and filesystem
   - Requires a `--name` argument: name of the project to remove
   - Supports `--force` flag to skip confirmation prompt
   - Removes project directory and all its files
   - Removes project entry from sef.json registry
   - Removes registry file if it becomes empty
+- **code:generate**: 
+  - Reads project configurations from `sef.json` registry
+  - Iterates over all registered projects
+  - Parses each project's `subgraph.yaml`
+  - Extracts events from subgraph eventHandlers definitions
+  - For each contract name creates an actual Solidity contract where there is one function per associated event
+  - Each function has the same arguments as the events and its purpose is only to emit the associated event
+  - Generates contracts in `./{projectName}/src/` directory
+
 
 ## Usage
 
 ```bash
 # Install the CLI
-deno install --allow-read --allow-write --allow-run --allow-net -n anvil-event-faker main.ts
+deno install --allow-read --allow-write --allow-run --allow-net -n anvil-event-faker src/main.ts
 
 # Initialize a project
-anvil-event-faker init --subgraph ../subgraph --name my-project
+anvil-event-faker subgraph:add --subgraph ../subgraph --name my-project
 
 # Generate fake contracts
 anvil-event-faker generate --name my-project
 
 # Remove a project
-anvil-event-faker remove --name my-project
+anvil-event-faker subgraph:remove --name my-project
 
 # Force remove without confirmation
-anvil-event-faker remove --name my-project --force
+anvil-event-faker subgraph:remove --name my-project --force
 ```
 
 ## Configuration

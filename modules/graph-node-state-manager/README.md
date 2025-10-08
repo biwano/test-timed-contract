@@ -5,15 +5,15 @@ A CLI tool to create fake contracts that only emit events based on subgraph defi
 ## Installation
 
 ```bash
-deno install --allow-read --allow-write --allow-run --allow-net -n anvil-event-faker main.ts
+deno task install
 ```
 
 ## Usage
 
-### Initialize a foundry project
+### Register a subgraph and initialize a foundry project
 
 ```bash
-anvil-event-faker init [--path <path>]
+anvil-event-faker subgraph:add [--path <path>]
 ```
 
 This command:
@@ -23,7 +23,7 @@ This command:
 ### Generate fake contracts
 
 ```bash
-anvil-event-faker generate [--config <path>]
+anvil-event-faker code:generate
 ```
 
 This command:
@@ -43,16 +43,16 @@ output_dir = "./src/fake_contracts"
 
 ## Example
 
-1. Initialize a project:
+1. Register a subgraph and initialize a project:
    ```bash
-   anvil-event-faker init --path ./my-event-faker
+   anvil-event-faker subgraph:add --path ./my-event-faker
    ```
 
 2. Update the `sef.conf` file to point to your subgraph
 
-3. Generate fake contracts:
+3. Generate fake contracts for all registered projects:
    ```bash
-   anvil-event-faker generate
+   anvil-event-faker code:generate
    ```
 
 This will create Solidity contracts in the output directory, each with functions that emit the events defined in your subgraph.

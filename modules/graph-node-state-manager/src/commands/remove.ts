@@ -2,7 +2,7 @@ import { Command } from "cliffy/command";
 import { exists } from "std/fs/exists.ts";
 
 export const removeCommand = new Command()
-  .name("remove")
+  .name("subgraph:remove")
   .description("Remove a foundry project from registry and filesystem")
   .option("-n, --name <name>", "Name of the project to remove", { required: true })
   .option("-f, --force", "Force removal without confirmation", { default: false })
