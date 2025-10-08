@@ -9,7 +9,7 @@ export async function startAnvilTask(): Promise<void> {
       stderr: "piped",
     });
 
-    const child = anvilProcess.spawn();
+    anvilProcess.spawn().unref();
     console.log("🚀 Starting anvil...");
 
     // Wait for anvil to be ready by checking the RPC endpoint
