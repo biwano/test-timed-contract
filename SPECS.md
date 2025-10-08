@@ -8,6 +8,17 @@ The project should be developed using:
 - foundry
 - openzeppelin
 
+### Monorepo layout
+
+```
+root/
+  src/                   # Solidity contracts
+  test/                  # Foundry tests
+  script/                # Foundry scripts
+  modules/subgraph/      # The Graph subgraph (schema, manifest, mappings)
+  modules/graph-node/    # Local Graph Node docker-compose
+```
+
 ## Part 1: Solidity contract
 
 ### Specs
@@ -72,3 +83,5 @@ The contract must implement those permissionless methods:
   arguments
 - Use Custom errors for reverts
 - Optimize contracts for gas efficiency
+ - Repository includes a .gitignore excluding Forge outputs (`out/`, `broadcast/`, `cache/`, `lib/`), tooling artifacts (e.g. `node_modules/`, coverage), environment files (`.env*`), and editor/OS files (e.g. `.vscode/`, `.idea/`, `*.log`).
+ - Subgraph should build with `graph codegen` and `graph build` without warnings.

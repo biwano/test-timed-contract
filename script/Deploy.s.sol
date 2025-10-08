@@ -6,9 +6,14 @@ import {TimedContract} from "src/TimedContract.sol";
 
 contract Deploy is Script {
     function run() external {
-        uint256 deployerPK = uint256(vm.envBytes32("PRIVATE_KEY"));
-        vm.startBroadcast(deployerPK);
-        new TimedContract();
+        vm.startBroadcast();
+        
+        // Deploy with CREATE2 to get deterministic address
+        bytes32 salt = keccak256("TimedContract-v1");
+        TimedContract timedContract = new TimedContract{salt: salt}();
+        
+        console.log("TimedContract deployed at:", address(timedContract));
+        
         vm.stopBroadcast();
     }
 }

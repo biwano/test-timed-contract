@@ -40,3 +40,10 @@ yarn-error.log*
 .tags
 Thumbs.db
 .DS_Store
+
+# Subgraph
+modules/subgraph/generated/
+modules/subgraph/build/
+modules/subgraph/node_modules/
+modules/subgraph/.ipfs-cache/
+

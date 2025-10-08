@@ -1,8 +1,12 @@
 {
   "tasks": {
-    "deploy": "deno run --allow-env=PRIVATE_KEY --allow-net --allow-read script/deploy.ts",
-    "script:reset": "deno run --allow-env --allow-net --allow-read scripts/reset.ts",
-    "script:update": "deno run --allow-env --allow-net --allow-read scripts/update.ts",
-    "script:state": "deno run --allow-env --allow-net --allow-read scripts/state.ts"
+    "contract:deploy": "forge script script/Deploy.s.sol --rpc-url http://localhost:8545 --broadcast --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    "call:reset": "cast send 0xbFFab14C5f812d3200A333594fE86f8410848852 \"reset(address)\" $ACCOUNT --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    "call:update": "cast send 0xbFFab14C5f812d3200A333594fE86f8410848852 \"update()\" --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    "call:state": "cast call 0xbFFab14C5f812d3200A333594fE86f8410848852 \"state(address)\" $ACCOUNT --rpc-url http://localhost:8545",
+    "anvil:fork": "anvil --host 0.0.0.0 --state state.anvil",
+    "graph:start": "cd modules/graph-node && docker compose up -d",
+    "subgraph:create": "cd modules/subgraph && npm run create-local",
+    "subgraph:deploy": "cd modules/subgraph && npm run deploy-local"
   }
 }
