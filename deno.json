@@ -8,6 +8,8 @@
     "graph:start": "cd modules/graph-node && docker compose up -d",
     "subgraph:create": "cd modules/subgraph && npm run create-local",
     "subgraph:deploy": "cd modules/subgraph && npm run deploy-local",
-    "anvil:timewarp": "cast rpc --rpc-url http://localhost:8545 evm_increaseTime 600 && cast rpc --rpc-url http://localhost:8545 evm_mine"
+    "anvil:timewarp": "cast rpc --rpc-url http://localhost:8545 evm_increaseTime 600 && cast rpc --rpc-url http://localhost:8545 evm_mine",
+    "test:integration": "deno test --allow-net --allow-run test/integration.test.ts",
+    "test:full": "deno test --allow-net --allow-run --allow-read --allow-write test/full-integration.test.ts"
   }
 }
