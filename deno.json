@@ -7,6 +7,7 @@
     "anvil:fork": "anvil --host 0.0.0.0 --state state.anvil",
     "graph:start": "cd modules/graph-node && docker compose up -d",
     "subgraph:create": "cd modules/subgraph && npm run create-local",
-    "subgraph:deploy": "cd modules/subgraph && npm run deploy-local"
+    "subgraph:deploy": "cd modules/subgraph && npm run deploy-local",
+    "anvil:timewarp": "cast rpc --rpc-url http://localhost:8545 evm_increaseTime 600 && cast rpc --rpc-url http://localhost:8545 evm_mine"
   }
 }
