@@ -1,47 +1,43 @@
 import { ANVIL_DEFAULT_RPC_URL } from "../utils/constants.ts";
 
 export async function startAnvilTask(): Promise<void> {
-  try {
-    // Start anvil in the background
-    const anvilProcess = new Deno.Command("anvil", {
-      args: ["--host", "0.0.0.0", "--port", "8545"],
-      stdout: "piped",
-      stderr: "piped",
-    });
+  // Start anvil in the background
+  const anvilProcess = new Deno.Command("anvil", {
+    args: ["--host", "0.0.0.0", "--port", "8545"],
+    stdout: "piped",
+    stderr: "piped",
+  });
 
-    anvilProcess.spawn().unref();
-    console.log("🚀 Starting anvil...");
+  anvilProcess.spawn().unref();
+  console.log("🚀 Starting anvil...");
 
-    // Wait for anvil to be ready by checking the RPC endpoint
-    const maxRetries = 30;
-    const retryDelay = 1000; // 1 second
+  // Wait for anvil to be ready by checking the RPC endpoint
+  const maxRetries = 30;
+  const retryDelay = 1000; // 1 second
 
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        const response = await fetch(ANVIL_DEFAULT_RPC_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            method: "eth_blockNumber",
-            params: [],
-            id: 1
-          })
-        });
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(ANVIL_DEFAULT_RPC_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "eth_blockNumber",
+          params: [],
+          id: 1
+        })
+      });
 
-        if (response.ok) {
-          console.log("✅ Anvil is ready and accepting connections");
-          return;
-        }
-      } catch {
-        // Anvil not ready yet, continue waiting
+      if (response.ok) {
+        console.log("✅ Anvil is ready and accepting connections");
+        return;
       }
-
-      await new Promise(resolve => setTimeout(resolve, retryDelay));
+    } catch {
+      // Anvil not ready yet, continue waiting
     }
 
-    throw new Error("Anvil failed to start within the expected time");
-  } catch (error) {
-    throw new Error(`Failed to start anvil: ${error instanceof Error ? error.message : String(error)}`);
+    await new Promise(resolve => setTimeout(resolve, retryDelay));
   }
+
+  throw new Error("Anvil failed to start within the expected time");
 }

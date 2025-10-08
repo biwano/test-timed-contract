@@ -9,37 +9,30 @@ export async function subgraphAddTask(subgraphPath: string, projectDir: string, 
   const subgraphYamlPath = `${subgraphPath}/subgraph.yaml`;
   console.log(`Validating subgraph YAML file: ${subgraphYamlPath}`);
 
-  try {
-    const subgraphContent = await Deno.readTextFile(subgraphYamlPath);
-    const subgraphData = parseYaml(subgraphContent) as Record<string, unknown>;
-    if (!subgraphData.specVersion) {
-      throw new Error("Invalid subgraph.yaml: missing required fields (specVersion, dataSources)");
-    }
-    console.log("✅ Subgraph YAML validation passed");
-  } catch (error) {
-    throw new Error(`Subgraph validation failed: ${error instanceof Error ? error.message : String(error)}`);
+  const subgraphContent = await Deno.readTextFile(subgraphYamlPath);
+  const subgraphData = parseYaml(subgraphContent) as Record<string, unknown>;
+  if (!subgraphData.specVersion) {
+    throw new Error("Invalid subgraph.yaml: missing required fields (specVersion, dataSources)");
   }
+  console.log("✅ Subgraph YAML validation passed");
 
   await ensureDir(projectDir);
 
   const originalCwd = Deno.cwd();
   Deno.chdir(projectDir);
-  try {
-    const initProcess = new Deno.Command("forge", {
-      args: ["init", ".", "--force"],
-      stdout: "piped",
-      stderr: "piped",
-    });
-    const { code, stdout, stderr } = await initProcess.output();
-    if (code !== 0) {
-      const errorText = new TextDecoder().decode(stderr);
-      throw new Error(`Failed to initialize foundry project: ${errorText}`);
-    }
-    console.log("Foundry project initialized successfully!");
-    console.log(new TextDecoder().decode(stdout));
-  } finally {
-    Deno.chdir(originalCwd);
+  const initProcess = new Deno.Command("forge", {
+    args: ["init", ".", "--force"],
+    stdout: "piped",
+    stderr: "piped",
+  });
+  const { code, stdout, stderr } = await initProcess.output();
+  if (code !== 0) {
+    const errorText = new TextDecoder().decode(stderr);
+    throw new Error(`Failed to initialize foundry project: ${errorText}`);
   }
+  console.log("Foundry project initialized successfully!");
+  console.log(new TextDecoder().decode(stdout));
+  Deno.chdir(originalCwd);
 
   // Update registry
   let registry: Record<string, { subgraph_path: string }> = {};

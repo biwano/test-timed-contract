@@ -16,22 +16,13 @@ export async function subgraphRemoveTask(projectDir: string, projectName: string
     }
   }
 
-  try {
-    await Deno.remove(projectDir, { recursive: true });
-    console.log(`✅ Removed project directory: ${projectDir}`);
-  } catch (error) {
-    throw new Error(`Failed to remove project directory: ${error instanceof Error ? error.message : String(error)}`);
-  }
+  await Deno.remove(projectDir, { recursive: true });
+  console.log(`✅ Removed project directory: ${projectDir}`);
 
   // Update registry
   let registry: Record<string, { subgraph_path: string }> = {};
-  try {
-    const registryContent = await Deno.readTextFile(REGISTRY_PATH);
-    registry = JSON.parse(registryContent);
-  } catch {
-    console.error("Registry file not found. No projects to remove.");
-    return;
-  }
+  const registryContent = await Deno.readTextFile(REGISTRY_PATH);
+  registry = JSON.parse(registryContent);
 
   if (!registry[projectName]) {
     console.error(`Project '${projectName}' not found in registry.`);
@@ -41,12 +32,8 @@ export async function subgraphRemoveTask(projectDir: string, projectName: string
   delete registry[projectName];
 
   if (Object.keys(registry).length === 0) {
-    try {
-      await Deno.remove(REGISTRY_PATH);
-      console.log("✅ Removed empty registry file");
-    } catch {
-      // File might not exist, that's okay
-    }
+    await Deno.remove(REGISTRY_PATH);
+    console.log("✅ Removed empty registry file");
   } else {
     await Deno.writeTextFile(REGISTRY_PATH, JSON.stringify(registry, null, 2));
     console.log("✅ Updated registry file");
