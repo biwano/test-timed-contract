@@ -22,6 +22,8 @@ services:
 
   graph-node:
     image: graphprotocol/graph-node:v0.35.0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - ipfs
       - postgres
@@ -36,8 +38,8 @@ services:
       postgres_pass: letmein
       postgres_db: graph
       ipfs: 'ipfs:5001'
-      # Replace with your chain; defaults to anvil on localhost
-      ethereum: 'localhost:http://host.docker.internal:8545'
+      # Connect to local Anvil fork
+      ethereum: 'mainnet:http://host.docker.internal:8545'
       RUST_LOG: info
 
 volumes:
