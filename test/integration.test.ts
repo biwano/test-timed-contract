@@ -136,6 +136,7 @@ Deno.test("TimedContract Integration Test", async () => {
   console.log("✓ Reset called successfully");
   
   // Wait a moment for subgraph to process
+  console.log("Waiting for subgraph to index reset event...");
   await new Promise(resolve => setTimeout(resolve, 2000));
   
   // 3. Query subgraph to check account is indexed with correct state
@@ -154,6 +155,7 @@ Deno.test("TimedContract Integration Test", async () => {
   `;
   
   const afterResetData = await querySubgraph(afterResetQuery);
+  console.log("Subgraph response after reset:", JSON.stringify(afterResetData, null, 2));
   assertExists(afterResetData.account, "Account should be indexed after reset");
   assertEquals(afterResetData.account.state, "INITIAL", "Account state should be INITIAL");
   assertEquals(afterResetData.account.totalResets, "1", "Total resets should be 1");

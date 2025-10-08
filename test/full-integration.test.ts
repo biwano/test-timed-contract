@@ -85,6 +85,76 @@ async function startGraphNode() {
   console.log("✓ Graph Node started");
 }
 
+// Helper function to wait for subgraph indexing to complete
+async function waitForSubgraphIndexing() {
+  console.log("Waiting for subgraph indexing to complete...");
+  
+  const maxRetries = 10; // 20 seconds total for debugging
+  const retryDelay = 2000; // 2 seconds between retries
+  
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch("http://localhost:8000/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: `{
+            indexingStatusForCurrentVersion(subgraph: "timed-contract") {
+              health
+              synced
+              chains {
+                latestBlock {
+                  number
+                }
+                chainHeadBlock {
+                  number
+                }
+              }
+            }
+          }`
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log("GraphQL response:", JSON.stringify(data, null, 2));
+        
+        const status = data.data?.indexingStatusForCurrentVersion;
+        
+        if (status) {
+          console.log(`Indexing status: health=${status.health}, synced=${status.synced}`);
+          
+          if (status.health === "healthy" && status.synced) {
+            console.log("✓ Subgraph indexing completed");
+            return;
+          }
+          
+          if (status.chains && status.chains.length > 0) {
+            const chain = status.chains[0];
+            const latestBlock = parseInt(chain.latestBlock?.number || "0", 16);
+            const chainHeadBlock = parseInt(chain.chainHeadBlock?.number || "0", 16);
+            console.log(`  Progress: ${latestBlock}/${chainHeadBlock} blocks indexed`);
+          }
+        } else {
+          console.log("No indexing status found in response");
+        }
+      } else {
+        console.log(`GraphQL request failed with status: ${response.status}`);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.log(`  Attempt ${i + 1}/${maxRetries} - Error checking indexing status: ${errorMessage}`);
+    }
+    
+    console.log(`  Attempt ${i + 1}/${maxRetries} - Indexing not complete yet, waiting...`);
+    await new Promise(resolve => setTimeout(resolve, retryDelay));
+  }
+  
+  throw new Error("Subgraph indexing did not complete within 2 minutes");
+}
+
 // Helper function to setup subgraph
 async function setupSubgraph() {
   console.log("Setting up subgraph...");
@@ -152,12 +222,33 @@ async function setupSubgraph() {
   
   // Extract deployment ID from deployment output
   const deployOutput = new TextDecoder().decode(deployStdout);
-  const deploymentMatch = deployOutput.match(/Deployed to http:\/\/localhost:8000\/subgraphs\/name\/timed-contract\/([a-zA-Z0-9]+)/);
+  console.log("Deployment output:", deployOutput);
+  
+  // Try multiple patterns to extract deployment ID
+  let deploymentMatch = deployOutput.match(/Deployed to http:\/\/localhost:8000\/subgraphs\/name\/timed-contract\/([a-zA-Z0-9]+)/);
+  
+  if (!deploymentMatch) {
+    // Try alternative pattern
+    deploymentMatch = deployOutput.match(/subgraphs\/name\/timed-contract\/([a-zA-Z0-9]+)/);
+  }
+  
+  if (!deploymentMatch) {
+    // Try pattern with Qm hash (IPFS hash)
+    deploymentMatch = deployOutput.match(/Qm[a-zA-Z0-9]{44,}/);
+    if (deploymentMatch) {
+      deploymentMatch = [deploymentMatch[0], deploymentMatch[0]]; // Wrap in array format
+    }
+  }
   
   if (deploymentMatch) {
     const deploymentId = deploymentMatch[1];
     const deploymentUrl = `http://localhost:8000/subgraphs/name/timed-contract/${deploymentId}`;
     console.log(`Subgraph deployed at: ${deploymentUrl}`);
+    console.log(`Deployment ID: ${deploymentId}`);
+    
+    // Wait for indexing to complete
+    await waitForSubgraphIndexing();
+    
     return deploymentUrl;
   } else {
     console.error("Failed to extract deployment ID from subgraph deployment output:");
