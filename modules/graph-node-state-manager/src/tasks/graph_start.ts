@@ -1,3 +1,5 @@
+import { GRAPH_NODE_URL } from "../utils/constants.ts";
+
 export async function startGraphNodeTask(): Promise<void> {
   console.log("🚀 Starting graph-node with docker-compose...");
 
@@ -25,8 +27,8 @@ export async function startGraphNodeTask(): Promise<void> {
 
   for (let i = 0; i < maxRetries; i++) {
     try {
-      // Try the admin JSON-RPC endpoint (port 8020) - more reliable for health checks
-      const response = await fetch("http://localhost:8020", {
+      // Try the admin JSON-RPC endpoint - more reliable for health checks
+      const response = await fetch(GRAPH_NODE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

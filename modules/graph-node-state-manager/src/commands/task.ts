@@ -3,9 +3,13 @@ import { killAnvilTask } from "../tasks/anvil_kill.ts";
 import { ANVIL_DEFAULT_PRIVATE_KEY, ANVIL_DEFAULT_RPC_URL } from "../utils/constants.ts";
 import { deployAllProjectsTask } from "../tasks/contracts_deploy.ts";
 import { startAnvilTask } from "../tasks/anvil_start.ts";
+import { startGraphNodeTask } from "../tasks/graph_start.ts";
+import { stopGraphNodeTask } from "../tasks/graph_stop.ts";
+import { wipeGraphNodeTask } from "../tasks/graph_wipe.ts";
+import { deployAllSubgraphsTask } from "../tasks/subgraph_deploy.ts";
 
 export const killAnvilCommand = new Command()
-  .name("anvil:stoss")
+  .name("anvil:stop")
   .description("Stop anvil if it is running")
   .action(async () => {
     try {
@@ -73,13 +77,65 @@ export const deployCommand = new Command()
     }
   });
 
+export const startGraphCommand = new Command()
+  .name("graph:start")
+  .description("Start graph-node")
+  .action(async () => {
+    try {
+      await startGraphNodeTask();
+    } catch (error) {
+      console.error("Error starting graph-node:", error instanceof Error ? error.message : String(error));
+      Deno.exit(1);
+    }
+  });
+
+export const stopGraphCommand = new Command()
+  .name("graph:stop")
+  .description("Stop graph-node")
+  .action(async () => {
+    try {
+      await stopGraphNodeTask();
+    } catch (error) {
+      console.error("Error stopping graph-node:", error instanceof Error ? error.message : String(error));
+      Deno.exit(1);
+    }
+  });
+
+export const wipeGraphCommand = new Command()
+  .name("graph:wipe")
+  .description("Wipe graph-node data (delete node-data folder)")
+  .action(async () => {
+    try {
+      await wipeGraphNodeTask();
+    } catch (error) {
+      console.error("Error wiping graph-node data:", error instanceof Error ? error.message : String(error));
+      Deno.exit(1);
+    }
+  });
+
+export const deploySubgraphsCommand = new Command()
+  .name("subgraph:deploy")
+  .description("Deploy all subgraphs to local graph-node")
+  .action(async () => {
+    try {
+      await deployAllSubgraphsTask();
+    } catch (error) {
+      console.error("Error deploying subgraphs:", error instanceof Error ? error.message : String(error));
+      Deno.exit(1);
+    }
+  });
+
 
   
 export const taskCommand = new Command()
-.name("task")
-.description("Task commands")
-.command("anvil:start", startAnvilCommand)
-.command("anvil:stop", killAnvilCommand)
-.command("anvil:setup", anvilSetupCommand)
-.command("generate:contracts", generateCommand)
-.command("deploy:contracts", deployCommand);
+  .name("task")
+  .description("Task commands")
+  .command("anvil:start", startAnvilCommand)
+  .command("anvil:stop", killAnvilCommand)
+  .command("anvil:setup", anvilSetupCommand)
+  .command("generate:contracts", generateCommand)
+  .command("deploy:contracts", deployCommand)
+  .command("graph:start", startGraphCommand)
+  .command("graph:stop", stopGraphCommand)
+  .command("graph:wipe", wipeGraphCommand)
+  .command("subgraph:deploy", deploySubgraphsCommand);

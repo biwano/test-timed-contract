@@ -3,7 +3,7 @@ import { join } from "std/path/mod.ts";
 import { parseSubgraph } from "../utils/subgraph_parser.ts";
 import { generateFakeContract } from "../utils/contract_generator.ts";
 import { buildDeployScript } from "../utils/deploy_script_generator.ts";
-import { REGISTRY_PATH } from "../utils/constants.ts";
+import { validateRegistry } from "../utils/registry.ts";
 
 export async function generateForProjectTask(projectName: string, subgraphPath: string, outRoot: string): Promise<void> {
   const resolvedSubgraphYamlPath = `${subgraphPath}/subgraph.yaml`;
@@ -38,14 +38,8 @@ export async function generateForProjectTask(projectName: string, subgraphPath: 
 }
 
 export async function generateAllProjectsTask(): Promise<void> {
-  const registryContent = await Deno.readTextFile(REGISTRY_PATH);
-  const registry = JSON.parse(registryContent) as Record<string, { subgraph_path: string }>;
-  
+  const registry = await validateRegistry();
   const projectNames = Object.keys(registry);
-  if (projectNames.length === 0) {
-    console.log("No projects found in registry. Run 'subgraph:add' first.");
-    return;
-  }
 
   for (const projectName of projectNames) {
     const projectConfig = registry[projectName];

@@ -39,8 +39,8 @@ export const removeCommand = new Command()
     }
   });
 
-  export const subgraphCommand = new Command()
-.name("subgraph")
-.description("Task commands")
-.command("add", addCommand)
-  .command("remove", removeCommand)
+export const subgraphCommand = new Command()
+  .name("subgraph")
+  .description("Manage subgraphs")
+  .command("add", addCommand)
+  .command("remove", removeCommand);

@@ -1,5 +1,5 @@
 import { exists } from "std/fs/exists.ts";
-import { REGISTRY_PATH } from "../utils/constants.ts";
+import { validateRegistry } from "../utils/registry.ts";
 
 export async function deployForProjectTask(projectDir: string, rpcUrl: string, privateKey: string): Promise<void> {
   const scriptPath = `${projectDir}/script/Deploy.s.sol`;
@@ -42,14 +42,8 @@ export async function deployForProjectTask(projectDir: string, rpcUrl: string, p
 }
 
 export async function deployAllProjectsTask(rpcUrl: string, privateKey: string): Promise<void> {
-  const registryContent = await Deno.readTextFile(REGISTRY_PATH);
-  const registry = JSON.parse(registryContent) as Record<string, { subgraph_path: string }>;
-  
+  const registry = await validateRegistry();
   const projectNames = Object.keys(registry);
-  if (projectNames.length === 0) {
-    console.log("No projects found in registry. Run 'subgraph:add' first.");
-    return;
-  }
 
   for (const projectName of projectNames) {
     const projectDir = `./foundry/${projectName}`;

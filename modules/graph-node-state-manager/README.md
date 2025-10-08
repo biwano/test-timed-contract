@@ -2,6 +2,15 @@
 
 A CLI tool to create fake contracts that only emit events based on subgraph definitions.
 
+## Prerequisites
+
+Before using this tool, make sure you have the following installed:
+
+- **Deno** - JavaScript/TypeScript runtime
+- **Foundry** - For smart contract development
+- **Graph CLI** - For subgraph deployment (`npm install -g @graphprotocol/graph-cli`)
+- **Docker Compose** - For running graph-node and IPFS services
+
 ## Installation
 
 ```bash
@@ -13,46 +22,75 @@ deno task install
 ### Register a subgraph and initialize a foundry project
 
 ```bash
-anvil-event-faker subgraph:add [--path <path>]
+deno task run subgraph add --subgraph <path> [--name <name>]
 ```
 
 This command:
 - Creates a new foundry project using `forge init`
-- Creates a `sef.conf` configuration file
+- Registers the subgraph in the project registry
 
 ### Generate fake contracts
 
 ```bash
-anvil-event-faker contracts:generate
+deno task run task generate:contracts
 ```
 
 This command:
-- Reads the subgraph.yaml file specified in the config
+- Reads all registered subgraph.yaml files
 - Parses contract ABIs and extracts events
 - Generates fake Solidity contracts that emit those events
 
-## Configuration
+### Deploy contracts
 
-The tool reads configuration from `sef.conf`:
-
-```ini
-# Solidity Event Faker Configuration
-subgraph_path = "../subgraph/subgraph.yaml"
-output_dir = "./src/fake_contracts"
+```bash
+deno task run task deploy:contracts
 ```
 
-## Example
+This command:
+- Deploys all generated fake contracts to Anvil
+- Uses the default Anvil private key and RPC URL
+
+### Manage graph-node
+
+```bash
+# Start graph-node
+deno task run task graph:start
+
+# Stop graph-node
+deno task run task graph:stop
+
+# Wipe graph-node data
+deno task run task graph:wipe
+
+# Deploy subgraphs
+deno task run task subgraph:deploy
+```
+
+## Configuration
+
+The tool uses a project registry (`config.json`) to track registered subgraphs and their associated foundry projects.
+
+## Example Workflow
 
 1. Register a subgraph and initialize a project:
    ```bash
-   anvil-event-faker subgraph:add --path ./my-event-faker
+   deno task run subgraph add --subgraph ./my-subgraph --name my-project
    ```
 
-2. Update the `sef.conf` file to point to your subgraph
-
-3. Generate fake contracts for all registered projects:
+2. Generate fake contracts for all registered projects:
    ```bash
-   anvil-event-faker contracts:generate
+   deno task run task generate:contracts
    ```
 
-This will create Solidity contracts in the output directory, each with functions that emit the events defined in your subgraph.
+3. Start Anvil and deploy contracts:
+   ```bash
+   deno task run task anvil:setup
+   ```
+
+4. Start graph-node and deploy subgraphs:
+   ```bash
+   deno task run task graph:start
+   deno task run task subgraph:deploy
+   ```
+
+This will create Solidity contracts in the foundry projects, each with functions that emit the events defined in your subgraph.
