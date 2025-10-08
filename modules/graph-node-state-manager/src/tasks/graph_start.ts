@@ -25,16 +25,20 @@ export async function startGraphNodeTask(): Promise<void> {
 
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const response = await fetch("http://localhost:8000/subgraphs/name/graph-node/graphql", {
+      // Try the admin JSON-RPC endpoint (port 8020) - more reliable for health checks
+      const response = await fetch("http://localhost:8020", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          query: "{ _meta { hasIndexingErrors } }"
+          jsonrpc: "2.0",
+          method: "subgraph_deploy",
+          params: [],
+          id: 1
         })
       });
 
       if (response.ok) {
-        console.log("✅ Graph-node is ready and accepting queries");
+        console.log("✅ Graph-node is ready and accepting connections");
         return;
       }
     } catch {
