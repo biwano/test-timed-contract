@@ -8,6 +8,7 @@ A tool to create fake contracts that only emits events based on subgraph definit
 - anvil
 - foundry
 - viem
+- vento
 
 ## What is it
 It is a CLI that can perform multiple tasks. It reads its config from a file called sef.json

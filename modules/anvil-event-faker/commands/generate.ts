@@ -3,6 +3,7 @@ import { ensureDir } from "https://deno.land/std@0.208.0/fs/ensure_dir.ts";
 import { join } from "https://deno.land/std@0.208.0/path/mod.ts";
 import { parseSubgraph } from "../utils/subgraph_parser.ts";
 import { generateFakeContract } from "../utils/contract_generator.ts";
+import { buildDeployScript } from "../utils/deploy_script.ts";
 
 export const generateCommand = new Command()
   .name("generate")
@@ -33,8 +34,10 @@ export const generateCommand = new Command()
       const subgraphData = await parseSubgraph(subgraphPath);
       console.log(`Found ${subgraphData.contracts.length} contracts in subgraph`);
       
-      // Ensure output directory exists
+      // Ensure output directories exist
       await ensureDir(outputDir);
+      const scriptDir = join(`./${options.name}`, "script");
+      await ensureDir(scriptDir);
       
       // Generate fake contracts for each contract
       for (const contract of subgraphData.contracts) {
@@ -45,6 +48,12 @@ export const generateCommand = new Command()
         await Deno.writeTextFile(outputPath, contractCode);
         console.log(`  Created: ${outputPath}`);
       }
+      
+      // Generate Foundry deployment script that deploys and etches to target addresses
+      const deployScriptPath = join(scriptDir, "Deploy.s.sol");
+      const deployScript = buildDeployScript(options.name, subgraphData.contracts);
+      await Deno.writeTextFile(deployScriptPath, deployScript);
+      console.log(`Created deployment script: ${deployScriptPath}`);
       
       console.log("Fake contracts generated successfully!");
       

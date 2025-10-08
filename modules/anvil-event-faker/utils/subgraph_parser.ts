@@ -1,54 +1,27 @@
 import { parse as parseYaml } from "https://deno.land/std@0.208.0/yaml/mod.ts";
-import { ParseAbiItem, parseAbiItem } from "https://esm.sh/viem@2.0.0";
+import { Contract, Event, SubgraphData, SubgraphYaml } from "./types.ts";
 
-export type ParsedEvent = ParseAbiItem<string>;
-
-export interface Contract {
-  name: string;
-  address: string;
-  events: ParsedEvent[];
-}
-
-export interface SubgraphData {
-  contracts: Contract[];
-}
 
 export async function parseSubgraph(subgraphPath: string): Promise<SubgraphData> {
   try {
     const subgraphContent = await Deno.readTextFile(subgraphPath);
-        const subgraph = parseYaml(subgraphContent) as Record<string, unknown>;
+    const subgraph = parseYaml(subgraphContent) as SubgraphYaml;
     
     const contracts: Contract[] = [];
     
     // Parse data sources from subgraph
     if (subgraph.dataSources && Array.isArray(subgraph.dataSources)) {
-      for (const source of subgraph.dataSources as Record<string, unknown>[]) {
-        const mapping = source.mapping as Record<string, unknown>;
+      for (const source of subgraph.dataSources) {
+        const mapping = source.mapping;
         if (mapping && mapping.eventHandlers && Array.isArray(mapping.eventHandlers)) {
-          const contractName = source.name as string;
-          const events: ParsedEvent[] = [];
-          
-          // Extract events from eventHandlers
-          for (const handler of mapping.eventHandlers as Record<string, unknown>[]) {
-            const eventSignature = handler.event as string;
-            
-            try {
-              // Use viem to parse the event signature
-              const parsed = parseAbiItem(`event ${eventSignature}`);
-              if (parsed && parsed.type === 'event') {
-                events.push(parsed);
-              }
-            } catch (error) {
-              console.warn(`Failed to parse event signature: ${eventSignature}`, error);
-              // Skip un-parseable events
-            }
-          }
+          const contractName = source.name;
+          const events: Event[] = mapping.eventHandlers
+            .map((handler) => parseEventSignature(handler.event));
           
           if (events.length > 0) {
-            const sourceObj = source.source as Record<string, unknown>;
             contracts.push({
               name: contractName,
-              address: (sourceObj.address as string) || "0x0000000000000000000000000000000000000000",
+              address: source.source.address || "0x0000000000000000000000000000000000000000",
               events: events
             });
           }
@@ -61,4 +34,29 @@ export async function parseSubgraph(subgraphPath: string): Promise<SubgraphData>
   } catch (error) {
     throw new Error(`Failed to parse subgraph: ${error instanceof Error ? error.message : String(error)}`);
   }
+}
+
+function parseEventSignature(eventSignature: string): Event {
+  const name = eventSignature.split('(')[0];
+
+  const paramsMatch = eventSignature.match(/\(([^)]*)\)/);
+  const inputs: Array<{ name: string; type: string; indexed?: boolean }> = [];
+  if (paramsMatch && paramsMatch[1]) {
+    const params = paramsMatch[1]
+      .split(',')
+      .map((p: string) => p.trim())
+      .filter((p: string) => p.length > 0);
+
+    let argIndex = 0;
+    for (const param of params) {
+      const parts = param.split(/\s+/);
+      const indexed = parts[0] === 'indexed';
+      const type = indexed ? (parts[1] || '') : (parts[0] || '');
+      const paramName = indexed ? (parts[2] || `arg${argIndex}`) : (parts[1] || `arg${argIndex}`);
+      inputs.push({ name: paramName, type, indexed });
+      argIndex += 1;
+    }
+  }
+
+  return { name, inputs };
 }

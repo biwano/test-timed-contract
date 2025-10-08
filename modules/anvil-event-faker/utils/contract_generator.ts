@@ -1,4 +1,4 @@
-import { Contract } from "./subgraph_parser.ts";
+import { Contract } from "./types.ts";
 
 export function generateFakeContract(contract: Contract): string {
   const contractName = contract.name;
@@ -16,17 +16,17 @@ contract ${contractName} {
 `;
 
   // Add events
-  for (const event of events as Array<{ name: string; inputs: unknown }>) {
+  for (const event of events) {
     solidityCode += `    event ${event.name}(${formatEventParameters(event.inputs as Array<{ name: string; type: string; indexed?: boolean }>)});\n`;
   }
   
   solidityCode += "\n";
   
   // Add functions that emit events
-  for (const event of events as Array<{ name: string; inputs: unknown }>) {
+  for (const event of events) {
     const functionName = `emit${capitalizeFirst(event.name)}`;
-    const parameters = formatFunctionParameters(event.inputs as Array<{ name: string; type: string; indexed?: boolean }>);
-    const emitCall = `emit ${event.name}(${formatEmitArguments(event.inputs as Array<{ name: string; type: string; indexed?: boolean }>)});`;
+    const parameters = formatFunctionParameters(event.inputs);
+    const emitCall = `emit ${event.name}(${formatEmitArguments(event.inputs)});`;
     
     solidityCode += `    function ${functionName}(${parameters}) external {\n`;
     solidityCode += `        ${emitCall}\n`;
@@ -42,7 +42,8 @@ function formatEventParameters(inputs: Array<{ name: string; type: string; index
   return inputs
     .map(input => {
       const indexed = input.indexed ? "indexed " : "";
-      return `${indexed}${input.type} ${input.name}`;
+      // Solidity expects: type indexed name
+      return `${input.type} ${indexed}${input.name}`;
     })
     .join(", ");
 }
