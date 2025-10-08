@@ -31,7 +31,7 @@ The tasks are:
   - Removes project directory and all its files
   - Removes project entry from sef.json registry
   - Removes registry file if it becomes empty
-- **code:generate**: 
+- **contracts:generate**: 
   - Reads project configurations from `sef.json` registry
   - Iterates over all registered projects
   - Parses each project's `subgraph.yaml`

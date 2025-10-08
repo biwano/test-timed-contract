@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "run": "deno run --allow-read --allow-write --allow-run --allow-net main.ts",
+    "run": "deno run --allow-read --allow-write --allow-run --allow-net src/main.ts",
     "install": "deno install --global --allow-read --allow-write --allow-run --allow-net -n graph-node-state-manager src/main.ts"
   },
   "imports": {

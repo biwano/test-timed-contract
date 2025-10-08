@@ -11,8 +11,8 @@ const main = new Command()
   .description("Manage fake contracts and deploy them to match a subgraph's state")
   .version("1.0.0")
   .command("subgraph:add", initCommand)
-  .command("code:generate", generateCommand)
   .command("subgraph:remove", removeCommand)
+  .command("contracts:generate", generateCommand)
   .command("deploy", deployCommand);
 
 if (import.meta.main) {

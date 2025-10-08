@@ -44,7 +44,7 @@ export async function generateForProject(projectName: string, subgraphPath: stri
 }
 
 export const generateCommand = new Command()
-  .name("code:generate")
+  .name("contracts:generate")
   .description("Generate fake contracts for all registered projects based on subgraph definitions")
   .action(async () => {
     try {

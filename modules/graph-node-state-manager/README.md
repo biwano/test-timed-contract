@@ -23,7 +23,7 @@ This command:
 ### Generate fake contracts
 
 ```bash
-anvil-event-faker code:generate
+anvil-event-faker contracts:generate
 ```
 
 This command:
@@ -52,7 +52,7 @@ output_dir = "./src/fake_contracts"
 
 3. Generate fake contracts for all registered projects:
    ```bash
-   anvil-event-faker code:generate
+   anvil-event-faker contracts:generate
    ```
 
 This will create Solidity contracts in the output directory, each with functions that emit the events defined in your subgraph.
