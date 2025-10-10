@@ -44,20 +44,17 @@ The tasks are:
 ## Usage
 
 ```bash
-# Install the CLI
-deno install --allow-read --allow-write --allow-run --allow-net -n anvil-event-faker src/main.ts
-
 # Initialize a project
-anvil-event-faker subgraph:add --subgraph ../subgraph --name my-project
+deno task run subgraph:add --subgraph ../subgraph --name my-project
 
 # Generate fake contracts
-anvil-event-faker generate --name my-project
+deno task run generate --name my-project
 
 # Remove a project
-anvil-event-faker subgraph:remove --name my-project
+deno task run subgraph:remove --name my-project
 
 # Force remove without confirmation
-anvil-event-faker subgraph:remove --name my-project --force
+deno task run subgraph:remove --name my-project --force
 ```
 
 ## Configuration

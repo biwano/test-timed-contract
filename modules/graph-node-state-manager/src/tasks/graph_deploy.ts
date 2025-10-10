@@ -18,8 +18,9 @@ async function deploySubgraph(subgraphPath: string, subgraphName: string): Promi
   try {
     // First, create the subgraph
     console.log(`📝 Creating subgraph: ${subgraphName}`);
-    const createProcess = new Deno.Command("graph", {
+    const createProcess = new Deno.Command("npx", {
       args: [
+        "@graphprotocol/graph-cli",
         "create",
         "--node", `${GRAPH_NODE_URL}/`,
         subgraphName
@@ -42,13 +43,19 @@ async function deploySubgraph(subgraphPath: string, subgraphName: string): Promi
       console.log(new TextDecoder().decode(createStdout));
     }
 
-    // Then, deploy the subgraph
-    console.log(`🚀 Deploying subgraph: ${subgraphName}`);
-    const deployProcess = new Deno.Command("graph", {
+    console.log(`Changed to subgraph directory: ${subgraphPath}`);
+
+    // Generate a random version label
+    const versionLabel = `v${Date.now()}`;
+    console.log(`🚀 Deploying subgraph: ${subgraphName} with version: ${versionLabel}`);
+    
+    const deployProcess = new Deno.Command("npx", {
       args: [
+        "@graphprotocol/graph-cli",
         "deploy",
         "--node", `${GRAPH_NODE_URL}/`,
         "--ipfs", IPFS_URL,
+        "--version-label", versionLabel,
         subgraphName,
         subgraphYamlPath
       ],
@@ -70,7 +77,7 @@ async function deploySubgraph(subgraphPath: string, subgraphName: string): Promi
   }
 }
 
-export async function deployAllSubgraphsTask(): Promise<void> {
+export async function deployAllGraphsTask(): Promise<void> {
   console.log("🚀 Deploying all subgraphs to local graph-node...");
   
   const registry = await validateRegistry();

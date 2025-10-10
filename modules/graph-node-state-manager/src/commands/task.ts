@@ -6,7 +6,7 @@ import { startAnvilTask } from "../tasks/anvil_start.ts";
 import { startGraphNodeTask } from "../tasks/graph_start.ts";
 import { stopGraphNodeTask } from "../tasks/graph_stop.ts";
 import { wipeGraphNodeTask } from "../tasks/graph_wipe.ts";
-import { deployAllSubgraphsTask } from "../tasks/subgraph_deploy.ts";
+import { deployAllGraphsTask } from "../tasks/graph_deploy.ts";
 
 export const killAnvilCommand = new Command()
   .name("anvil:stop")
@@ -113,12 +113,12 @@ export const wipeGraphCommand = new Command()
     }
   });
 
-export const deploySubgraphsCommand = new Command()
-  .name("subgraph:deploy")
+export const deployGraphCommand = new Command()
+  .name("graph:deploy")
   .description("Deploy all subgraphs to local graph-node")
   .action(async () => {
     try {
-      await deployAllSubgraphsTask();
+      await deployAllGraphsTask();
     } catch (error) {
       console.error("Error deploying subgraphs:", error instanceof Error ? error.message : String(error));
       Deno.exit(1);
@@ -133,9 +133,9 @@ export const taskCommand = new Command()
   .command("anvil:start", startAnvilCommand)
   .command("anvil:stop", killAnvilCommand)
   .command("anvil:setup", anvilSetupCommand)
-  .command("generate:contracts", generateCommand)
-  .command("deploy:contracts", deployCommand)
+  .command("contracts:generate", generateCommand)
+  .command("contracts:deploy", deployCommand)
   .command("graph:start", startGraphCommand)
   .command("graph:stop", stopGraphCommand)
   .command("graph:wipe", wipeGraphCommand)
-  .command("subgraph:deploy", deploySubgraphsCommand);
+  .command("graph:deploy", deployGraphCommand);
