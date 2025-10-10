@@ -1,7 +1,21 @@
 import { exists } from "std/fs/exists.ts";
 import { validateRegistry } from "../utils/registry.ts";
+import { upsertContracts } from "../utils/config.ts";
 
-export async function deployForProjectTask(projectDir: string, rpcUrl: string, privateKey: string): Promise<void> {
+function parseDeployedAddressesFromStdout(output: string): Record<string, string> {
+  const res: Record<string, string> = {};
+  const lines = output.split('\n');
+  for (const line of lines) {
+    // Expect lines like: DEPLOYED:TimedContract:0xabc...
+    const m = line.match(/DEPLOYED:([^:]+):(0x[a-fA-F0-9]{40})\s*$/);
+    if (m) {
+      res[m[1]] = m[2];
+    }
+  }
+  return res;
+}
+
+export async function deployForProjectTask(projectName: string, projectDir: string, rpcUrl: string, privateKey: string): Promise<void> {
   const scriptPath = `${projectDir}/script/Deploy.s.sol`;
 
   if (!(await exists(projectDir))) {
@@ -37,7 +51,16 @@ export async function deployForProjectTask(projectDir: string, rpcUrl: string, p
     throw new Error(new TextDecoder().decode(stderr));
   }
 
-  console.log(new TextDecoder().decode(stdout));
+  const output = new TextDecoder().decode(stdout);
+  console.log(output);
+
+  // Prefer parsing deployed addresses from stdout markers
+  const deployedAddresses = parseDeployedAddressesFromStdout(output);
+
+  if (Object.keys(deployedAddresses).length > 0) {
+    await upsertContracts(projectName, deployedAddresses);
+  }
+  
   console.log(`✅ Deployment script executed successfully for project: ${projectDir}.`);
 }
 
@@ -47,7 +70,7 @@ export async function deployAllProjectsTask(rpcUrl: string, privateKey: string):
 
   for (const projectName of projectNames) {
     const projectDir = `./foundry/${projectName}`;
-    await deployForProjectTask(projectDir, rpcUrl, privateKey);
+    await deployForProjectTask(projectName, projectDir, rpcUrl, privateKey);
   }
 }
 

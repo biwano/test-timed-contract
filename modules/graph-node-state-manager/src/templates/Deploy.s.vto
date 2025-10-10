@@ -16,7 +16,7 @@ contract Deploy is Script {
         vm.startBroadcast();
 {{ for c of contracts }}
         {{ c.instanceName }} = new {{ c.name }}();
-        vm.etch({{ c.address }}, address({{ c.instanceName }}).code);
+        console.log(string.concat("DEPLOYED:", "{{ c.name }}", ":", vm.toString(address({{ c.instanceName }}))));
 {{ /for }}
         vm.stopBroadcast();
     }

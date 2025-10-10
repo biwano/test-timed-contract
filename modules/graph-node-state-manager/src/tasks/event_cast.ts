@@ -1,6 +1,7 @@
 import { ANVIL_DEFAULT_PRIVATE_KEY, ANVIL_DEFAULT_RPC_URL } from "../utils/constants.ts";
 import { validateRegistry } from "../utils/registry.ts";
 import { parseSubgraph } from "../utils/subgraph_parser.ts";
+import { getDeployedAddress } from "../utils/config.ts";
 
 function capitalize(text: string): string {
   return text.length === 0 ? text : text[0].toUpperCase() + text.slice(1);
@@ -41,6 +42,8 @@ function validateArgFormat(type: string, value: string): string | null {
   }
   return null; // other solidity types not strictly validated here
 }
+
+// getDeployedAddress now provided by utils/config
 
 export async function buildEventCastCommand(
   projectName: string,
@@ -85,9 +88,13 @@ export async function buildEventCastCommand(
     }
   }
 
-  const address = (contract.address || "").trim();
+  // Require an actual deployed address from config; do not fallback to subgraph address
+  const address = await getDeployedAddress(projectName, dataSourceName);
   if (!address) {
-    throw new Error(`No contract address found for datasource '${dataSourceName}'. Ensure the subgraph 'source.address' is set.`);
+    throw new Error(
+      `No deployed address found for datasource '${dataSourceName}' in project '${projectName}'. ` +
+      `Deploy contracts first (e.g., 'deno task run task anvil:setup') so addresses are recorded in config.json.`
+    );
   }
 
   const methodSig = `emit${capitalize(event.name)}(${expectedTypes.join(",")})`;
@@ -101,6 +108,8 @@ export async function buildEventCastCommand(
     "--private-key",
     ANVIL_DEFAULT_PRIVATE_KEY,
   ];
+
+  console.log(`cast ${args.join(" ")}`);
 
   const cmd = new Deno.Command("cast", {
     args,

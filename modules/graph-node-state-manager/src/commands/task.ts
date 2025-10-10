@@ -131,22 +131,17 @@ export const setupGraphCommand = new Command()
   .description("Complete graph setup: stop, wipe, start, and deploy all subgraphs")
   .action(async () => {
     try {
-      console.log("🚀 Starting complete graph setup...");
       
       // Stop graph-node if running
-      console.log("1️⃣ Stopping graph-node...");
       await stopGraphNodeTask();
       
       // Wipe graph-node data
-      console.log("2️⃣ Wiping graph-node data...");
       await wipeGraphNodeTask();
       
       // Start graph-node
-      console.log("3️⃣ Starting graph-node...");
       await startGraphNodeTask();
       
       // Deploy all subgraphs
-      console.log("4️⃣ Deploying all subgraphs...");
       await deployAllGraphsTask();
       
       console.log("✅ Graph setup completed successfully!");

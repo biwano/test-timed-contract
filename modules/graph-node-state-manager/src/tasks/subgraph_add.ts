@@ -1,6 +1,6 @@
 import { ensureDir } from "std/fs/ensure_dir.ts";
 import { parse as parseYaml } from "std/yaml/mod.ts";
-import { REGISTRY_PATH } from "../utils/constants.ts";
+import { upsertProject } from "../utils/config.ts";
 
 export async function subgraphAddTask(subgraphPath: string, projectDir: string, projectName: string): Promise<void> {
   console.log(`Initializing foundry project at: ${projectDir}`);
@@ -34,20 +34,7 @@ export async function subgraphAddTask(subgraphPath: string, projectDir: string, 
   console.log(new TextDecoder().decode(stdout));
   Deno.chdir(originalCwd);
 
-  // Update registry
-  let registry: Record<string, { subgraph_path: string }> = {};
-  try {
-    const existingRegistry = await Deno.readTextFile(REGISTRY_PATH);
-    registry = JSON.parse(existingRegistry);
-  } catch {
-    // File doesn't exist, start with empty registry
-  }
-
-  registry[projectName] = {
-    subgraph_path: subgraphPath
-  };
-
-  await Deno.writeTextFile(REGISTRY_PATH, JSON.stringify(registry, null, 2));
+  await upsertProject(projectName, { subgraph_path: subgraphPath });
   console.log(`Updated registry with project: ${projectName}`);
 }
 
