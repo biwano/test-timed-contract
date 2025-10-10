@@ -3,7 +3,7 @@ import { ANVIL_DEFAULT_RPC_URL } from "../utils/constants.ts";
 export async function startAnvilTask(): Promise<void> {
   // Start anvil in the background
   const anvilProcess = new Deno.Command("anvil", {
-    args: ["--host", "0.0.0.0", "--port", "8545"],
+    args: ["--host", "0.0.0.0", "--port", "8545", "--steps-tracing"],
     stdout: "piped",
     stderr: "piped",
   });

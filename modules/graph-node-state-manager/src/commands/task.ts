@@ -8,6 +8,8 @@ import { stopGraphNodeTask } from "../tasks/graph_stop.ts";
 import { wipeGraphNodeTask } from "../tasks/graph_wipe.ts";
 import { deployAllGraphsTask } from "../tasks/graph_deploy.ts";
 import { buildEventCastCommand } from "../tasks/event_cast.ts";
+import { generateAllProjectsTask } from "../tasks/contracts_generate.ts";
+import { inspectTxTask } from "../tasks/anvil_inspect.ts";
 
 export const killAnvilCommand = new Command()
   .name("anvil:stop")
@@ -42,6 +44,7 @@ export const anvilSetupCommand = new Command()
     try {
       await killAnvilTask();
       await startAnvilTask();
+      await generateAllProjectsTask();
       await deployAllProjectsTask(ANVIL_DEFAULT_RPC_URL, ANVIL_DEFAULT_PRIVATE_KEY);
       Deno.exit(0);
     } catch (error) {
@@ -49,9 +52,6 @@ export const anvilSetupCommand = new Command()
       Deno.exit(1);
     }
   });
-
-
-  import { generateAllProjectsTask } from "../tasks/contracts_generate.ts";
 
 export const generateCommand = new Command()
   .name("contracts:generate")
@@ -164,6 +164,19 @@ export const eventCommand = new Command()
     }
   });
 
+export const anvilInspectCommand = new Command()
+  .name("anvil:inspect")
+  .arguments("<txHash:string>")
+  .description("Inspect a transaction using debug_traceTransaction on the local Anvil node")
+  .action(async (_options, txHash: string) => {
+    try {
+      await inspectTxTask(txHash);
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : String(error));
+      Deno.exit(1);
+    }
+  });
+
   
 export const taskCommand = new Command()
   .name("task")
@@ -171,6 +184,7 @@ export const taskCommand = new Command()
   .command("anvil:start", startAnvilCommand)
   .command("anvil:stop", killAnvilCommand)
   .command("anvil:setup", anvilSetupCommand)
+  .command("anvil:inspect", anvilInspectCommand)
   .command("contracts:generate", generateCommand)
   .command("contracts:deploy", deployCommand)
   .command("graph:start", startGraphCommand)
@@ -178,5 +192,6 @@ export const taskCommand = new Command()
   .command("graph:wipe", wipeGraphCommand)
   .command("graph:deploy", deployGraphCommand)
   .command("graph:setup", setupGraphCommand)
-  .command("event", eventCommand);
+  .command("event", eventCommand)
+  
 

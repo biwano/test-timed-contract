@@ -6,7 +6,7 @@ dataSources:
     name: TimedContract
     network: mainnet
     source:
-      address: "0xbFFab14C5f812d3200A333594fE86f8410848852" # deterministic address
+      address: "0xbFFab14C5f812d3200A333594fE86f8410848852"
       abi: TimedContract
       startBlock: 0
     mapping:
