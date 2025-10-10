@@ -5,14 +5,14 @@ export async function generateFakeContract(contract: Contract): Promise<string> 
   if (!contract.events || contract.events.length === 0) {
     throw new Error(`No events found for contract '${contract.name}'`);
   }
-  const eventDeclarations = contract.events.map(e => `        event ${e.name}(${formatEventParameters(e.inputs)});`);
+  const eventDeclarations = contract.events.map(e => `    event ${e.name}(${formatEventParameters(e.inputs)});`);
 
   const functionsDeclarations = contract.events.map((e, index) => {
     const event = contract.events[index];
     const funcName = `emit${capitalize(e.name)}`;
     const params = formatFunctionParameters(event.inputs);
     const emitArgs = formatEmitArguments(event.inputs);
-    return `function ${funcName}(${params}) external {\n        emit ${event.name}(${emitArgs});\n    }`;
+    return `    function ${funcName}(${params}) external {\n        emit ${event.name}(${emitArgs});\n    }`;
   });
 
   return await renderWithVento("Contract.vto", {

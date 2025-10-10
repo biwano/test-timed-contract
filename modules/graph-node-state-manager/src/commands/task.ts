@@ -7,6 +7,7 @@ import { startGraphNodeTask } from "../tasks/graph_start.ts";
 import { stopGraphNodeTask } from "../tasks/graph_stop.ts";
 import { wipeGraphNodeTask } from "../tasks/graph_wipe.ts";
 import { deployAllGraphsTask } from "../tasks/graph_deploy.ts";
+import { buildEventCastCommand } from "../tasks/event_cast.ts";
 
 export const killAnvilCommand = new Command()
   .name("anvil:stop")
@@ -155,6 +156,18 @@ export const setupGraphCommand = new Command()
     }
   });
 
+export const eventCommand = new Command()
+  .name("event")
+  .arguments("<project:string> <datasource:string> <event:string> [args...:string]")
+  .description("Generate a cast send command for a project's datasource event")
+  .action(async (_options, project: string, datasource: string, event: string, ...args: string[]) => {
+    try {
+      await buildEventCastCommand(project, datasource, event, args);
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : String(error));
+      Deno.exit(1);
+    }
+  });
 
   
 export const taskCommand = new Command()
@@ -169,4 +182,6 @@ export const taskCommand = new Command()
   .command("graph:stop", stopGraphCommand)
   .command("graph:wipe", wipeGraphCommand)
   .command("graph:deploy", deployGraphCommand)
-  .command("graph:setup", setupGraphCommand);
+  .command("graph:setup", setupGraphCommand)
+  .command("event", eventCommand);
+
